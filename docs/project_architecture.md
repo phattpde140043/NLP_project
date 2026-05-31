@@ -36,12 +36,12 @@ Trong đó $D$ là chiều không gian nhúng của token (ví dụ: $D = 128$).
 Thay vì duyệt qua từng tài liệu bằng vòng lặp Python gây tắc nghẽn GIL và CPU overhead, hệ thống thực hiện toán tử MaxSim song song trên toàn bộ batch ứng viên bằng phép nhân Tensor thông qua Einstein Summation:
 
 1.  **Tính toán ma trận tương tương đồng Cosine chéo cho toàn batch**:
-    $$\mathbf{S}_{b, q, m} = \sum_{d} \mathbf{E}_{q, q, d} \cdot \mathbf{E}_{\text{docs}, b, m, d}$$
+    $$\mathbf{S} _{b, i, j} = \sum _{d=1}^{D} \mathbf{E} _{q, i, d} \cdot \mathbf{E} _{\mathrm{docs}, b, j, d}$$
     
-    Phép tính Tensor này tương đương với phép nhân ma trận chéo của từng cặp vector token nhúng, tạo ra ma trận tương đồng kích thước $(B \times N_q \times M_{\text{max}})$.
+    Phép tính Tensor này tương đương với phép nhân ma trận chéo của từng cặp vector token nhúng, tạo ra ma trận tương đồng kích thước $(B \times N_q \times M_{\mathrm{max}})$.
 
 2.  **Toán tử MaxSim toán học**:
-    $$S(q, d_b) = \sum_{i=1}^{N_q} \max_{j=1}^{M_{\text{max}}} \mathbf{S}_{b, i, j}$$
+    $$S(q, d_b) = \sum _{i=1}^{N_q} \max _{j=1}^{M _{\mathrm{max}}} \mathbf{S} _{b, i, j}$$
 
 ### 🛠️ Triển khai NumPy Vectorized tối ưu hóa SIMD/BLAS:
 
