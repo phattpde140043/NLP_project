@@ -369,7 +369,7 @@ sequenceDiagram
     User->>RAG: Gửi Câu hỏi (Query)
     
     %% STAGE 1
-    rect rgb(25, 30, 45)
+    rect rgb(235, 245, 255)
         Note right of RAG: Stage 1: Cheap Query Profiling
         RAG->>Analyzer: route_query(query)
         Analyzer->>Analyzer: Phân loại intent & EMA hysteresis trượt
@@ -377,7 +377,7 @@ sequenceDiagram
     end
 
     %% STAGE 7 (Pre-retrieval)
-    rect rgb(30, 40, 50)
+    rect rgb(245, 245, 250)
         Note right of RAG: Stage 7: 2-Stage Cache Lookup
         RAG->>Cache: lookup_cache(query, query_vector)
         Cache->>Cache: Khớp Exact (L1) + Khớp Ngữ nghĩa Qdrant (L2)
@@ -388,7 +388,7 @@ sequenceDiagram
     end
 
     %% STAGE 2 & 4
-    rect rgb(25, 30, 45)
+    rect rgb(235, 245, 255)
         Note right of RAG: Stage 2 & 4: Parallel Hedged Search & SLA Breaker
         RAG->>DB: Thực hiện Dense HNSW Search (ANN)
         RAG->>RAG: Chạy song song Local BM25 Lexical Search (NumPy)
@@ -400,7 +400,7 @@ sequenceDiagram
     end
 
     %% STAGE 3
-    rect rgb(30, 40, 50)
+    rect rgb(245, 245, 250)
         Note right of RAG: Stage 3: Multi-Signal Uncertainty Diagnostics
         RAG->>Analyzer: diagnose_uncertainty(raw_scores)
         Analyzer->>Analyzer: Chuẩn hóa Robust MAD & Tính toán Entropy H_q
@@ -408,7 +408,7 @@ sequenceDiagram
     end
 
     %% STAGE 5
-    rect rgb(25, 30, 45)
+    rect rgb(235, 245, 255)
         Note right of RAG: Stage 5: Expected Utility HyDE Gate
         alt is_uncertain == True
             RAG->>Expander: evaluate_hyde_utility(entropy, gap)
@@ -424,14 +424,14 @@ sequenceDiagram
     end
 
     %% STAGE 6
-    rect rgb(30, 40, 50)
+    rect rgb(245, 245, 250)
         Note right of RAG: Stage 6: Rerank Benefit Predictor
         RAG->>RAG: Đánh giá expected gain (Skip Rerank nếu expected gain < 5%)
         RAG->>RAG: Duy trì 8% ngẫu nhiên cho Contextual Bandit exploration
     end
 
     %% STAGE 8
-    rect rgb(25, 30, 45)
+    rect rgb(235, 245, 255)
         Note right of RAG: Stage 8: LLM Dispatch & Calibrated Synthesis
         RAG->>LLM: Gửi ngữ cảnh (context chunks) + Câu hỏi
         LLM-->>RAG: Trả về câu trả lời tổng hợp (Answer)
@@ -484,7 +484,7 @@ Chúng ta sẽ mở rộng và tái cấu trúc tài liệu RFC với **5 Chươ
 - **Bài toán tối ưu ràng buộc (Constrained Latency Optimization)**:
   $$\text{minimize } Cost(q) \quad \text{subject to} \quad \text{Latency}(q) \le \text{SLA}_{\text{target}}$$
 - **Cơ chế Ước lượng Độ phức tạp câu hỏi ($H_q$)**: Đo đạc độ hỗn loạn ngữ nghĩa (semantic ambiguity), độ hiếm từ vựng (lexical rarity thông qua phân phối IDF), và độ dài câu truy vấn để tự động điều chỉnh:
-  $$K_{\text{candidate}} = f(H_q) \quad \text{và} \quad \text{ef\_search} = g(H_q)$$
+  $$K_{\text{candidate}} = f(H_q) \quad \text{và} \quad \text{ef-search} = g(H_q)$$
 - **Bảng phân loại trạng thái ngân sách**: So sánh hành vi và thông số giữa Low, Medium và High complexity queries.
 
 ### 📈 (B) Online Learning & Feedback Loops (Vòng phản hồi & Học máy Trực tuyến)
@@ -1259,7 +1259,7 @@ Trong các hệ thống tìm kiếm thông tin ngữ nghĩa (Semantic Informatio
 3. **Retrieval Budget Controller (Bộ Kiểm soát Ngân sách)**:
    * *Ý nghĩa*: Không phải truy vấn nào cũng đòi hỏi tài nguyên tính toán như nhau. Phép truy vấn đơn giản như *"HNSW là gì?"* (low query entropy $H_q$) chỉ cần candidate pool hẹp; trái lại, truy vấn so sánh đa chiều phức tạp (high query entropy) yêu cầu candidate pool sâu rộng và reranking chuyên sâu.
    * *Thuật toán*: Ước lượng độ phức tạp của câu hỏi dựa trên entropy ngữ nghĩa (semantic ambiguity), độ hiếm của từ vựng (lexical rarity), và độ dài câu hỏi để **quyết định động (dynamic scaling)** các thông số:
-     $$K_{\text{candidate}} = f(H_q) \quad \text{và} \quad \text{ef\_search} = g(H_q)$$
+     $$K_{\text{candidate}} = f(H_q) \quad \text{và} \quad \text{ef-search} = g(H_q)$$
      Giúp giảm thiểu tối đa chi phí CPU/GPU và tối ưu hóa thời gian phản hồi (Serving Latency).
 4. **Candidate Generation (ANN/Sparse)**: Lực lượng truy hồi thô ưu tiên tối đa Recall. Sử dụng đồ thị HNSW cho Dense và đảo ngược index cho Sparse.
 5. **Hybrid Fusion (RRF)**: Dung hợp kết quả thưa và đặc thông qua Reciprocal Rank Fusion nhằm bù đắp khoảng cách từ vựng.
@@ -1270,7 +1270,7 @@ Trong các hệ thống tìm kiếm thông tin ngữ nghĩa (Semantic Informatio
 
 ### 💰 1.2 Mô hình hóa Tối ưu hóa Ngân sách Truy hồi (Retrieval Budget Optimization)
 Trong một hệ thống tìm kiếm phục vụ AI Agent ở quy mô lớn, chi phí và tài nguyên tiêu tốn cho mỗi truy vấn được mô tả bởi phương trình:
-$$Cost(q) = C_{\text{retrieval}}(K_{\text{candidate}}, \text{ef\_search}) + C_{\text{rerank}}(K_{\text{rerank}}) + C_{\text{LLM}}(N_{\text{tokens}})$$
+$$Cost(q) = C_{\text{retrieval}}(K_{\text{candidate}}, \text{ef-search}) + C_{\text{rerank}}(K_{\text{rerank}}) + C_{\text{LLM}}(N_{\text{tokens}})$$
 
 Để tối ưu hóa hệ thống, chúng ta giải bài toán **Constrained Latency Optimization (Tối ưu hóa Ràng buộc Độ trễ)**:
 $$\min_{K, \text{ef}, R} Cost(q)$$
@@ -1285,7 +1285,7 @@ $$H_q = \beta_1 \cdot \text{Entropy}_{\text{semantic}}(q) + \beta_2 \cdot \text{
 
 *Bảng quyết định động của Bộ kiểm soát ngân sách:*
 
-| Chỉ số phức tạp ($H_q$) | Cấp độ câu hỏi | $K_{\text{candidate}}$ | $\text{ef\_search}$ | $K_{\text{rerank}}$ | Context Size (LLM) |
+| Chỉ số phức tạp ($H_q$) | Cấp độ câu hỏi | $K_{\text{candidate}}$ | $\text{ef-search}$ | $K_{\text{rerank}}$ | Context Size (LLM) |
 | :--- | :--- | :---: | :---: | :---: | :---: |
 | **$H_q < 2.0$** | Thấp (Low Complexity) | 10 | 8 | 0 (Skip) | Ngắn (Tinh gọn) |
 | **$2.0 \le H_q < 5.0$** | Trung bình (Standard) | 50 | 32 | 15 | Trung bình |
