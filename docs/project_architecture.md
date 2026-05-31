@@ -174,7 +174,7 @@ Mặc dù kiến trúc Phase 9 đạt cấp độ Enterprise, trong thực tế 
 *   **Giải pháp**: Tích hợp một ma trận mặt nạ nhị phân (Binary Masking Tensor - `mask` shape $B \times M_{\text{max}}$). Hệ thống thiết lập giá trị tương đồng chéo tại các vị trí padded về giá trị cực tiểu:
     $$\mathbf{S}_{b, q, m}[\mathbf{mask}_{b, m} == 0] = -\infty$$
     Để tránh lỗi toán học khi toàn bộ dòng bị mask, hệ thống bổ sung lớp kiểm tra điều kiện an toàn:
-    $$\mathbf{valid\_mask} = \mathbf{mask.any(axis=1)}$$
+    $$\mathbf{valid-mask} = \mathbf{mask.any(axis=1)}$$
     Nếu một tài liệu trống hoàn toàn, hệ thống sẽ tự động gán một điểm số phạt hữu hạn cực lớn (ví dụ: $-1e9$) thay vì $-\infty$ để bảo toàn tính ổn định số học trong NumPy.
 
 ### 🔴 7.2. Điểm tối ưu của `np.einsum` vs GEMM optimized & Layout Bộ Nhớ
@@ -929,7 +929,7 @@ graph TD
      * Số trang vật lý (`page` - được chuẩn hóa bắt đầu từ `0` cho PDF, mặc định `0` cho Word).
      * Tên tệp nguồn (`source`).
   3. Kết quả đầu ra là danh sách các đối tượng `LCDocument` của LangChain:
-     $$\text{LCDocument} = \{ \text{page\_content: str}, \text{metadata: } \{ \text{source: str}, \text{page: int} \} \}$$
+     $$\text{LCDocument} = \{ \text{page-content: str}, \text{metadata: } \{ \text{source: str}, \text{page: int} \} \}$$
 
 ---
 
@@ -1027,7 +1027,7 @@ Hệ thống phân rã rạch ròi quy trình thành cấu trúc **8-Stage Contr
 ### 🚀 1.1 Stage 1: Cheap Query Profiling & Calibrated Intent Routing
 Stage 1 đưa ra **Hồ sơ Truy vấn (Query Profile)** độc lập với kết quả tìm kiếm thực tế với độ trễ cực thấp **$<1.5$ms**.
 *   **Learned Lightweight Router**: Bộ phân loại Logistic Regression dựa trên trích xuất đặc trưng đặc thù:
-    $$\mathbf{x} = \Big[ F_{\text{regex\_match}}, F_{\text{symbol\_density}}, F_{\text{caps\_ratio}}, F_{\text{token\_rarity}}, F_{\text{query\_length}}, F_{\text{lexical\_dominance}} \Big]$$
+    $$\mathbf{x} = \Big[ F_{\text{regex-match}}, F_{\text{symbol-density}}, F_{\text{caps-ratio}}, F_{\text{token-rarity}}, F_{\text{query-length}}, F_{\text{lexical-dominance}} \Big]$$
 *   **Percentile-Based Online Calibration (Self-Tuning Temperature)**:
     Thay vì gán cứng các nhiệt độ $T$ gây ra routing oscillation, hệ thống tự động xác định nhiệt độ hiệu chuẩn $T$ dựa trên khoảng phân phối bách phân vị thực tế của các scores trong active corpus:
     $$T = \max\Big(0.05, \frac{P_{90}(\mathbf{s}) - P_{10}(\mathbf{s})}{2.0}\Big)$$
@@ -1045,7 +1045,7 @@ Stage 1 đưa ra **Hồ sơ Truy vấn (Query Profile)** độc lập với kế
 *   **Parallel Hedged Retrieval**: Khởi chạy song song cả tìm kiếm vector (ANN Search trên Qdrant) và tìm kiếm từ khóa cục bộ (Local BM25) ngay từ đầu. Thay vì chờ đợi ANN thất bại rồi mới fallback (gây cộng dồn độ trễ), hệ thống sẽ theo dõi và lấy kết quả trả về trước từ hai luồng.
 *   **Search Path Bias Control trong Progressive ANN**:
     Để chống lại hiện tượng kẹt vào local minima do đồ thị ANN bị aging hoặc các vùng ngữ nghĩa mật độ cao:
-    $$\mathbf{frontier}_{\text{new}} = \alpha \cdot \mathbf{frontier}_{\text{reused}} + (1-\alpha) \cdot \mathbf{entrypoints}_{\text{fresh\_random}} \quad (\alpha = 0.7)$$
+    $$\mathbf{frontier}_{\text{new}} = \alpha \cdot \mathbf{frontier}_{\text{reused}} + (1-\alpha) \cdot \mathbf{entrypoints}_{\text{fresh-random}} \quad (\alpha = 0.7)$$
     Phối trộn đỉnh biên cũ từ Probe Search với các entry points ngẫu nhiên mới để tối đa hóa graph exploration diversity.
 
 ---
@@ -1090,7 +1090,7 @@ HyDE là tác vụ đắt đỏ. Để kiểm soát chi phí tính toán (HyDE C
 ### 📊 1.6 Stage 6: Rerank Benefit Predictor & Contextual Bandit Exploration
 Reranker là một compute sink khổng lồ. Để tránh lãng phí compute và triệt tiêu lỗi vòng lặp phản hồi tự củng cố tiêu cực (Self-Reinforcing Feedback Loop Collapse):
 *   **Feature-Rich Marginal Gain Predictor**:
-    Ước lượng sự cải thiện thứ hạng dự kiến ($\text{Gain}_{\text{expected}}$) dựa trên $\text{Gap}_{1,2}$, $\text{ScoreVariance}$, $\text{RerankDisagreement}$, và $\text{ANN\_Depth}$. Nếu $\text{Gain}_{\text{expected}} < 0.05$, rerank sẽ bị bỏ qua để tiết kiệm compute.
+    Ước lượng sự cải thiện thứ hạng dự kiến ($\text{Gain}_{\text{expected}}$) dựa trên $\text{Gap}_{1,2}$, $\text{ScoreVariance}$, $\text{RerankDisagreement}$, và $\text{ANN-Depth}$. Nếu $\text{Gain}_{\text{expected}} < 0.05$, rerank sẽ bị bỏ qua để tiết kiệm compute.
 *   **Contextual Bandit Exploration Budget**:
     Để tránh việc predictor bỏ qua rerank liên tục làm mất đi tính đa dạng của nhãn huấn luyện ngoại tuyến, hệ thống duy trì **Exploration Budget** cố định: **5-10%** lưu lượng truy cập ngẫu nhiên luôn được kích hoạt Rerank đầy đủ để thu thập các nhãn unbiased dữ liệu huấn luyện.
 
@@ -1535,7 +1535,7 @@ Hệ thống thiết lập các chỉ số giám sát phục vụ (retrieval met
 
 1.  **User Reformulation Rate (URR - Tỷ lệ viết lại câu hỏi)**:
     Đo lường tần suất người dùng liên tục thay đổi từ khóa của câu hỏi trong thời gian ngắn (ví dụ: dưới 45 giây) khi khoảng cách ngữ nghĩa giữa các câu hỏi hẹp:
-    $$\text{URR} = \frac{\sum_{i} \mathbb{I}(\text{dist}(q_i, q_{i-1}) < \theta \quad \text{within} \quad t_{\text{window}})}{N_{\text{total\_sessions}}}$$
+    $$\text{URR} = \frac{\sum_{i} \mathbb{I}(\text{dist}(q_i, q_{i-1}) < \theta \quad \text{within} \quad t_{\text{window}})}{N_{\text{total-sessions}}}$$
     Trong đó $\text{dist}$ là khoảng cách vector nhúng ngữ nghĩa của hai truy vấn liên tiếp, và $\mathbb{I}$ là hàm chỉ thị. **URR cao là dấu hiệu trực tiếp của việc hệ thống truy hồi ngữ cảnh sai lệch (retrieval mismatch)**, ép buộc người dùng phải tìm cách diễn đạt khác.
 2.  **Abandonment Rate (AR - Tỷ lệ bỏ rơi)**:
     Tỷ lệ các phiên người dùng gửi truy vấn nhưng hoàn toàn không sao chép câu trả lời, không click vào nguồn trích dẫn và thoát cửa sổ hội thoại:
@@ -1758,7 +1758,7 @@ Hệ thống tuân thủ chặt chẽ nguyên lý **Clean Architecture**, tách 
    $$\hat{\mathbf{p}}_t = \beta \cdot \hat{\mathbf{p}}_{t-1} + (1-\beta)\mathbf{p}_t$$
 2. **Stage 2 (Parallel Hedged Search & Bias Blending)**:
    Khởi chạy song song tìm kiếm vector đồ thị HNSW và local lexical BM25 tự thiết kế. Áp dụng pha trộn entrypoints ngẫu nhiên để khắc phục search path bias:
-   $$\mathbf{frontier}_{\text{new}} = \alpha \cdot \mathbf{frontier}_{\text{reused}} + (1-\alpha) \cdot \mathbf{entrypoints}_{\text{fresh\_random}}$$
+   $$\mathbf{frontier}_{\text{new}} = \alpha \cdot \mathbf{frontier}_{\text{reused}} + (1-\alpha) \cdot \mathbf{entrypoints}_{\text{fresh-random}}$$
 3. **Stage 3 (Multi-Signal Uncertainty Diagnostics)**:
    Chuẩn hóa scores bằng Median & MAD clipping về $[-4, 4]$ chống Softmax Saturation:
    $$s''_i = \mathrm{clip}\left(\frac{s_i - \mathrm{median}(\mathbf{s})}{\text{MAD}(\mathbf{s}) + \epsilon}, -4, 4\right)$$
